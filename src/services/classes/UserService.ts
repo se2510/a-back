@@ -2,8 +2,8 @@ import { User } from "../../entities/User";
 import { IUserService, ResetPasswordResult } from "../interfaces/IUserService";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { inject, injectable } from "tsyringe";
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import * as argon2 from 'argon2'; // Cambia bcrypt por argon2
+import { mapUser, mapUsers } from '../../mappers/userMapper';
 
 @injectable()
 export class UserService implements IUserService 
@@ -12,33 +12,29 @@ export class UserService implements IUserService
     @inject('IUserRepository') private userRepository: IUserRepository
   ) {}
 
-  async GetUsers(): Promise<User[]> 
-  {
-    return this.userRepository.GetUsers();
+  async GetUsers(): Promise<Omit<User, 'password'>[]> {
+    const users = await this.userRepository.GetUsers();
+    return mapUsers(users);
   }
   
-  async DeleteUser(id: number): Promise<void> 
-  {
+  async DeleteUser(id: number): Promise<void> {
     await this.userRepository.DeleteUser(id);
   }
   
-  async UpdateUser(id: number, user: Partial<User>): Promise<User> 
-  {
-    return this.userRepository.UpdateUser(id, user);
+  async UpdateUser(id: number, user: Partial<User>): Promise<User> {
+    return await this.userRepository.UpdateUser(id, user);
   }
   
-  async GetUserById(id: number): Promise<User | null> 
-  {
-    return this.userRepository.GetUserById(id);
+  async GetUserById(id: number): Promise<Omit<User, 'password'> | null> {
+    const user = await this.userRepository.GetUserById(id);
+    return user ? mapUser(user) : null;
   }
   
-  async GetUserByEmail(email: string): Promise<User | null> 
-  {
+  async GetUserByEmail(email: string): Promise<User | null> {
     return this.userRepository.GetUserByEmail(email);
   }
 
-  async GetUserByUsername(username: string): Promise<User | null> 
-  {
+  async GetUserByUsername(username: string): Promise<User | null> {
     return this.userRepository.GetUserByUsername(username);
   }
 
@@ -46,9 +42,8 @@ export class UserService implements IUserService
     return this.userRepository.getUserByResetToken(token);
   }
   
-  async CreateUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> 
-  {
-    return this.userRepository.CreateUser(user);
+  async CreateUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+    return await this.userRepository.CreateUser(user);
   }
 
   async savePasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
@@ -82,15 +77,14 @@ export class UserService implements IUserService
         };
       }
 
-      // Hashear la nueva contraseña
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      // Hashear la nueva contraseña con argon2
+      const hashedPassword = await argon2.hash(newPassword);
 
       // Actualizar contraseña y limpiar token
       await this.userRepository.UpdateUser(user.id, {
-        passwordHash: hashedPassword,
-        resetPasswordToken: undefined, // Usar undefined en lugar de null para TypeScript
-        resetPasswordExpires: undefined // Usar undefined en lugar de null para TypeScript
+        password: hashedPassword,
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
       });
 
       return { success: true };

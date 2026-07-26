@@ -1,10 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { container } from 'tsyringe';
-
 import { AuthController } from '../controllers/AuthController';
 import { UserController } from '../controllers/UserController';
 import { ProjectController } from '../controllers/ProjectController';
-import { auth } from '../middlewares/auth';
+import { AssetController } from '../controllers/AssetController';
+import { GenerativeAIController } from '../controllers/GenerativeAIController';
+import { auth }              from '../middlewares/auth';
+import { AdminController }   from '../controllers/AdminController';
+import { authUser } from "../middlewares/authUser";
 
 const router = Router();
 
@@ -12,32 +15,26 @@ const router = Router();
 const authCtrl = container.resolve(AuthController);
 const userCtrl = container.resolve(UserController);
 const projectCtrl = container.resolve(ProjectController);
+const assetCtrl   = container.resolve(AssetController);
+const generativeAICtrl = container.resolve(GenerativeAIController);
+const adminCtrl    = container.resolve(AdminController);
 
 // Rutas de autenticación
 const authRouter = Router();
-authRouter.post('/register', (req, res) => authCtrl.RegisterUser(req, res));
-authRouter.post('/login', (req, res) => authCtrl.Login(req, res));
-authRouter.post('/reset-password', (req, res) => authCtrl.ResetPassword(req, res));
-authRouter.post('/logout', (req, res) => authCtrl.Logout(req, res));
-authRouter.post('/verify-email', (req, res) => authCtrl.VerifyEmail(req, res));
+authRouter.post('/register', authCtrl.RegisterUser.bind(authCtrl));
+authRouter.post('/login', authCtrl.Login.bind(authCtrl));
+authRouter.post('/reset-password', authCtrl.ResetPassword.bind(authCtrl));
+authRouter.post('/logout', authCtrl.Logout.bind(authCtrl));
+authRouter.post('/verify-email', authCtrl.VerifyEmail.bind(authCtrl));
 
+// Rutas publicas
 router.use('/auth', authRouter);
-
-// Middleware para manejar rutas protegidas
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  auth(req, res, (err?: any) => {
-    if (err) {
-      return res.status(401).json({
-        status: 'error',
-        message: 'Authentication failed'
-      });
-    }
-    next();
-  });
-};
+router.use('/generativeai', generativeAICtrl.router);
+router.use('/asset',  assetCtrl.router);
 
 // Rutas protegidas
-router.use('/users', authMiddleware, userCtrl.router);
-router.use('/projects', authMiddleware, projectCtrl.router);
+router.use('/users', authUser, userCtrl.router);
+router.use('/projects', authUser, projectCtrl.router);
+router.use('/admin', authUser, adminCtrl.router);
 
 export default router;

@@ -1,4 +1,5 @@
 import { UserCreateDto } from "../../dtos/users/UserCreateDto";
+import {User} from "../../entities/User";
 
 export interface IAuthService 
 {
@@ -13,4 +14,5 @@ export interface IAuthService
     ResetPassword(token: string, newPassword: string): Promise<void>;
     VerifyEmail(email: string, token: string): Promise<{ success: boolean; message: string }>;
     Logout(token: string): Promise<void>;
+
 }

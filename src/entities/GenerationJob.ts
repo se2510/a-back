@@ -15,8 +15,8 @@ export class GenerationJob {
   @Column('text')
   prompt!: string;
 
-  @Column({ type: 'enum', enum: ['pending','running','done','error'], default: 'pending' })
-  status!: 'pending' | 'running' | 'done' | 'error';
+  @Column({ type: 'enum', enum: ['pending','running','done','error','canceled'], default: 'pending' })
+  status!: 'pending' | 'running' | 'done' | 'error' | 'canceled';
 
   @Column({ nullable: true })
   resultUrl?: string;

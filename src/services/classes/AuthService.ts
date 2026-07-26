@@ -3,13 +3,23 @@ import { UserCreateDto } from "../../dtos/users/UserCreateDto";
 import { IAuthService } from "../interfaces/IAuthService";
 import { IUserService } from "../interfaces/IUserService";
 import { User } from "../../entities/User";
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import * as jwt from 'jsonwebtoken';
-import { JWT_SECRET, FRONTEND_URL } from '../../config/env';
+import { JWT_SECRET } from '../../config/env';
 import { TokenBlacklistService } from '../TokenBlacklistService';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 import emailService from '../../utils/emailService';
+import {
+    ERROR_ROLE_INVALID,
+    ERROR_USERNAME_EXISTS,
+    USER_ROLE_ADMIN,
+    USER_ROLE_ARTIST,
+    USER_ROLE_MANAGER,
+    USER_STATE_ACTIVE, UserRole
+} from '../../constants/admin';
+import { AppError } from '../../errors/AppError';
+import { HTTP_BAD_REQUEST } from '../../constants/httpStatus';
 
 @injectable()
 export class AuthService implements IAuthService 
@@ -36,8 +46,8 @@ export class AuthService implements IAuthService
                 };
             }
 
-            // Verificar contraseña
-            const valid = await bcrypt.compare(password, user.passwordHash);
+            // Verificar contraseña con argon2
+            const valid = await argon2.verify(user.password, password);
             if (!valid) {
                 return { 
                     success: false, 
@@ -84,25 +94,26 @@ export class AuthService implements IAuthService
         // Verificar si el usuario ya existe
         const existingUser = await this.userService.GetUserByEmail(userData.email);
         if (existingUser) {
-            throw new Error('User with this email already exists');
+            throw new AppError(ERROR_USERNAME_EXISTS, HTTP_BAD_REQUEST);
         }
 
         // Validar el rol
-        if (userData.role !== 'admin' && userData.role !== 'creator') {
-            throw new Error('Invalid role. Must be either "admin" or "creator"');
+        const validRoles: UserRole[] = [USER_ROLE_ADMIN as UserRole, USER_ROLE_ARTIST as UserRole, USER_ROLE_MANAGER as UserRole];
+        if (!validRoles.includes(userData.role as UserRole)) {
+            throw new AppError(ERROR_ROLE_INVALID, HTTP_BAD_REQUEST);
         }
 
-        // Hashear la contraseña
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+        // Hashear la contraseña con argon2
+        const hashedPassword = await argon2.hash(userData.password);
 
         // Crear el nuevo usuario
         const newUser: Omit<User, 'id' | 'createdAt' | 'updatedAt'> = {
             username: userData.username,
             email: userData.email,
-            passwordHash: hashedPassword,
-            role: userData.role as 'admin' | 'creator',
+            password: hashedPassword,
+            role: userData.role as UserRole,
             state: 'pending_verification', // Estado inicial hasta verificar el correo
+            deleted: false,
         };
 
         const createdUser = await this.userService.CreateUser(newUser);
@@ -120,7 +131,7 @@ export class AuthService implements IAuthService
         );
         
         // Enviar correo de verificación
-        const verificationUrl = `${FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        const verificationUrl = `/verify-email?token=${verificationToken}`;
         await emailService.sendVerificationEmail(createdUser.email, verificationUrl);
         
         return 'Usuario registrado exitosamente. Por favor verifica tu correo electrónico.';
@@ -143,7 +154,7 @@ export class AuthService implements IAuthService
         await this.userService.savePasswordResetToken(user.id, resetToken, resetTokenExpiry);
         
         // Enviar correo con el enlace de restablecimiento
-        const resetUrl = `${FRONTEND_URL}/reset-password?token=${resetToken}`;
+        const resetUrl = `/reset-password?token=${resetToken}`;
         await emailService.sendResetPasswordEmail(user.email, resetUrl);
     }
 
@@ -160,13 +171,12 @@ export class AuthService implements IAuthService
             throw new Error('El enlace de restablecimiento ha expirado');
         }
 
-        // Hashear la nueva contraseña
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        // Hashear la nueva contraseña con argon2
+        const hashedPassword = await argon2.hash(newPassword);
 
         // Actualizar la contraseña y limpiar el token
         await this.userService.UpdateUser(user.id, {
-            passwordHash: hashedPassword,
+            password: hashedPassword,
             resetPasswordToken: undefined,
             resetPasswordExpires: undefined
         });
@@ -191,7 +201,7 @@ export class AuthService implements IAuthService
 
             // Actualizar el estado del usuario a activo
             await this.userService.UpdateUser(user.id, {
-                state: 'active',
+                state: USER_STATE_ACTIVE,
                 resetPasswordToken: undefined,
                 resetPasswordExpires: undefined
             });

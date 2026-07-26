@@ -1,9 +1,12 @@
-
-
-export interface IGenerativeAIService 
-{
-    GenerateAsset(prompt: string, model: string, assetType: string): Promise<string>;    
-    GetSatus(jobId: string): Promise<string>;
-    CancelGeneration(jobId: string): Promise<void>;
+export interface IGenerativeAIService {
+    GenerateAsset(
+        prompt: string,
+        model: string,
+        assetType: string,
+        projectId: number,
+        referenceImageId?: number
+    ): Promise<{ jobId: number; assetId: number }>;
+    GetStatus(jobId: number): Promise<string>;
+    CancelGeneration(jobId: number): Promise<void>;
     GetLog(projectId: string): Promise<string>;
 }

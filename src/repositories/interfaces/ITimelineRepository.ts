@@ -1,6 +1,9 @@
-export interface ITimelineRepository
-{
-   SaveTimeline(userId: number, timeLineData: any): Promise<void>;
-   GetTimeline(userId: number): Promise<any>;
-   UpdateTimeline(userId: number, timeLineData: any): Promise<void>;
+import { TimelineEvent } from "../../entities/TimelineEvent";
+import { CreateTimelineEventDTO, UpdateTimelineEventDTO } from "../../dtos/Timeline";
+
+export interface ITimelineRepository {
+    exists(timelineId: number): Promise<boolean>;
+    saveTimeline(timelineId: number, timelineData: CreateTimelineEventDTO): Promise<void>;
+    getTimeline(timelineId: number): Promise<TimelineEvent>;
+    updateTimeline(timelineId: number, timelineData: UpdateTimelineEventDTO): Promise<TimelineEvent>;
 }

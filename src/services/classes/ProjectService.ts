@@ -1,26 +1,49 @@
+
 import { Project } from "../../entities/Project";
 import { IProjectService } from "../interfaces/IProjectService";
+import { ProjectRepository } from "../../repositories/classes/ProjectRepository";
+import { AppDataSource } from "../../config/container";
 
 export class ProjectService implements IProjectService 
 {
-  DeleteProject(id: number): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  CreateProject(project: Partial<Project>): Promise<Project> 
+
+  private projectRepository = new ProjectRepository(AppDataSource);
+
+  async DeleteProject(id: number): Promise<void>
   {
-    throw new Error("Method not implemented.");
+    const project = await this.projectRepository.GetProjectById(id);
+
+    if (!project) {
+      throw new Error(`Project with ID ${id} not found.`);
+    }
+
+    await this.projectRepository.DeleteProject(id);
+
   }
-  GetProjects(): Promise<Project[]> 
+
+  async CreateProject(project: Partial<Project>): Promise<Project> 
   {
-    throw new Error("Method not implemented.");
+    return await this.projectRepository.CreateProject(project);
   }
-  GetProjectById(id: number): Promise<Project | null> 
+  
+  async GetProjects(): Promise<Project[]> 
   {
-    throw new Error("Method not implemented.");
+    return await this.projectRepository.GetProjects();
   }
-  UpdateProject(id: number, project: Partial<Project>): Promise<Project> 
+  
+  async GetProjectById(id: number): Promise<Project | null> 
   {
-    throw new Error("Method not implemented.");
+    const project = await this.projectRepository.GetProjectById(id);
+    return project ? project : null;
+  }
+  
+  async UpdateProject(id: number, project: Partial<Project>): Promise<Project> 
+  {
+    return this.projectRepository.UpdateProject(id, project);
+  }
+  async exists(id: number): Promise<boolean> {
+    const project = await this.projectRepository.GetProjectById(id);
+    return project !== null;
   }
   // class implementation
 }

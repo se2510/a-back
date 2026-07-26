@@ -20,9 +20,9 @@ export class UserResponseDto
 
   /**
    * Rol del usuario (admin o creator)
-   * @example 'creator'
+   * @example 'artist'
    */
-  role!: 'admin' | 'creator';
+  role!: 'artist' | 'manager' | 'admin';
 
   /**
    * Fecha de creación del usuario
@@ -35,4 +35,5 @@ export class UserResponseDto
    * @example '2023-01-01T00:00:00.000Z'
    */
   updatedAt?: Date;
+
 }

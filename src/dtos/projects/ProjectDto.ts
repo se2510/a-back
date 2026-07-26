@@ -2,10 +2,12 @@ import { IsString, IsOptional } from 'class-validator';
 
 export class ProjectDto 
 {
-  @IsString()
+  @IsString() //nombre del proyecto
   name!: string;
 
   @IsOptional()
-  @IsString()
+  @IsString() //descripcion del proyecto
   description?: string;
 }
+
+

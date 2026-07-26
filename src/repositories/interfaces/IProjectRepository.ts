@@ -7,4 +7,5 @@ export interface IProjectRepository
   GetProjectById(id: number): Promise<Project | null>;
   UpdateProject(id: number, project: Partial<Project>): Promise<Project>;
   DeleteProject(id: number): Promise<void>;
+  findById(id: number): Promise<Project | null>;
 }

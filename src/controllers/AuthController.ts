@@ -17,7 +17,6 @@ type AsyncRequestHandler = (req: Request, res: Response) => Promise<void>;
 export class AuthController 
 {
   private router: Router;
-
   constructor(
     @inject('IAuthService') private readonly authService: IAuthService,
     @inject('IUserService') private readonly userService: IUserService
@@ -336,5 +335,4 @@ export class AuthController
       });
     }
   }
- 
 }

@@ -11,6 +11,6 @@ export class UserCreateDto
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   password!: string;
 
-  @IsIn(['admin', 'creator'], { message: 'El rol debe ser "admin" o "creator"' })
-  role!: 'admin' | 'creator';
+  @IsIn(['artist' , 'manager' , 'admin'], { message: 'El rol debe ser "admin", "artist" o "manager"' })
+  role!: 'artist' | 'manager' | 'admin';
 }

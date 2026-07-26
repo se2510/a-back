@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column,
   CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate
 } from 'typeorm';
+import { UserRole } from '../constants/admin';
 
 @Entity({ name: 'users' })
 export class User {
@@ -15,16 +16,16 @@ export class User {
   email!: string;
 
   @Column()
-  passwordHash!: string;
+  password!: string;
 
-  @Column({ type: 'enum', enum: ['creator','admin'], default: 'creator' })
-  role!: 'creator' | 'admin';
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.ARTIST })
+  role!: UserRole;
 
   @Column({ type: 'enum', enum: ['pending_verification', 'active'], default: 'pending_verification' })
   state!: 'pending_verification' | 'active';
 
-  @CreateDateColumn()
-  createdAt!: Date;
+  @Column({ type: 'boolean', default: false })
+  deleted!: boolean;
 
   @UpdateDateColumn()
   updatedAt!: Date;

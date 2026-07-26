@@ -9,6 +9,8 @@ import { IProjectRepository } from '../repositories/interfaces/IProjectRepositor
 import { ProjectRepository } from '../repositories/classes/ProjectRepository';
 import { IAssetRepository } from '../repositories/interfaces/IAssetRepository';
 import { AssetRepository } from '../repositories/classes/AssetRepository';
+import { IGenerativeAIRepository } from '../repositories/interfaces/IGenerativeAIRepository';
+import { GenerativeAIRepository } from '../repositories/classes/GenerativeAIRepository';
 
 // Services
 import { IUserService } from '../services/interfaces/IUserService';
@@ -17,17 +19,41 @@ import { IProjectService } from '../services/interfaces/IProjectService';
 import { ProjectService } from '../services/classes/ProjectService';
 import { IAssetService } from '../services/interfaces/IAssetService';
 import { AssetService } from '../services/classes/AssetService';
+import { IGenerativeAIService } from '../services/interfaces/IGenerativeAIService';
+import { GenerativeAIService } from '../services/classes/GenerativeAIService';
+import { IBlobStorageService } from '../services/interfaces/IBlobStorageService';
+import { BlobStorageService } from '../services/classes/BlobStorageService';
 import { IAuthService } from '../services/interfaces/IAuthService';
 import { AuthService } from '../services/classes/AuthService';
+import { IAdminService } from '../services/interfaces/IAdminService';
+import { AdminService } from '../services/classes/AdminService';
+import { TokenBlacklistService } from '../services/TokenBlacklistService';
+
+// Providers
+import { RunwayMLProvider } from '../providers/classes/RunwayMLProvider';
+import { MediaProviderRegistry } from '../providers/classes/MediaProviderRegistry';
+import { IMediaProviderRegistry } from '../providers/interfaces/IMediaProviderRegistry';
+import { IVideoProvider } from '../providers/interfaces/IVideoProvider';
 
 // Controllers
 import { AuthController } from '../controllers/AuthController';
 import { UserController } from '../controllers/UserController';
 import { ProjectController } from '../controllers/ProjectController';
 
-import { DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME } from './env';
+// Env
+import {
+  DB_HOST,
+  DB_PORT,
+  DB_USER,
+  DB_PASS,
+  DB_NAME,
+  DB_SSL,
+  AZURE_STORAGE_ACCOUNT_NAME,
+  AZURE_STORAGE_CONTAINER_NAME,
+  AZURE_STORAGE_ACCOUNT_KEY,
+} from './env';
 
-// Configuración de la fuente de datos de TypeORM
+// Configuración de TypeORM
 export const AppDataSource = new DataSource({
   type: 'mysql',
   host: DB_HOST,
@@ -36,35 +62,46 @@ export const AppDataSource = new DataSource({
   password: DB_PASS,
   database: DB_NAME,
   entities: [__dirname + '/../entities/*.{ts,js}'],
-  synchronize: true,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-  logging: process.env.NODE_ENV === 'development'
+  synchronize: false,
+  ssl: DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
+  logging: process.env.NODE_ENV === 'development',
 });
 
-// Registrar instancias singleton
+// Registrar instancia de DataSource
 container.registerInstance(DataSource, AppDataSource);
 
-// Registrar repositorios
+// Registrar Repositories
 container.registerSingleton<IUserRepository>('IUserRepository', UserRepository);
 container.registerSingleton<IProjectRepository>('IProjectRepository', ProjectRepository);
 container.registerSingleton<IAssetRepository>('IAssetRepository', AssetRepository);
+container.registerSingleton<IGenerativeAIRepository>('IGenerativeAIRepository', GenerativeAIRepository);
 
-// Registrar servicios
-import { TokenBlacklistService } from '../services/TokenBlacklistService';
-
-container.registerSingleton('TokenBlacklistService', TokenBlacklistService);
+// Registrar Services
 container.registerSingleton<IUserService>('IUserService', UserService);
 container.registerSingleton<IProjectService>('IProjectService', ProjectService);
 container.registerSingleton<IAssetService>('IAssetService', AssetService);
-
-// Registrar AuthService
+container.registerSingleton<IGenerativeAIService>('IGenerativeAIService', GenerativeAIService);
+container.registerSingleton<IBlobStorageService>('IBlobStorageService', BlobStorageService);
 container.registerSingleton<IAuthService>('IAuthService', AuthService);
+container.registerSingleton<IAdminService>('IAdminService', AdminService);
+container.registerSingleton('TokenBlacklistService', TokenBlacklistService);
 
-// Registrar controladores
+// Registrar Providers
+container.registerSingleton<IVideoProvider>('RunwayMLProvider', RunwayMLProvider);
+container.registerSingleton<IMediaProviderRegistry>('IMediaProviderRegistry', MediaProviderRegistry);
+
+// Registrar Controladores
 container.registerSingleton('AuthController', AuthController);
 container.registerSingleton('UserController', UserController);
 container.registerSingleton('ProjectController', ProjectController);
+
+// Registrar configuración de Azure Blob Storage
+container.register('AZURE_BLOB_CONFIG', {
+  useValue: {
+    accountName: AZURE_STORAGE_ACCOUNT_NAME,
+    containerName: AZURE_STORAGE_CONTAINER_NAME,
+    accountKey: AZURE_STORAGE_ACCOUNT_KEY,
+  },
+});
 
 export { container };
