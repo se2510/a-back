@@ -1,0 +1,304 @@
+openapi: 3.0.3
+info:
+  title: Studio API
+  version: 1.0.0
+  description: API REST para gestión de usuarios, autenticación y administración en Studio
+servers:
+  - url: https://api-studio.centralus-01.azurewebsites.net/api/v1
+paths:
+  /auth/register:
+    post:
+      summary: Registro de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password, role]
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [artist, manager, admin]
+      responses:
+        '201':
+          description: Usuario registrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /auth/login:
+    post:
+      summary: Login de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        '401':
+          description: Credenciales inválidas
+  /auth/logout:
+    post:
+      summary: Logout de usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: integer
+      responses:
+        '200':
+          description: Logout exitoso
+  /auth/resetpassword:
+    post:
+      summary: Resetear contraseña
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Email enviado
+  /auth/verifyemail:
+    post:
+      summary: Verificar email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, token]
+              properties:
+                email:
+                  type: string
+                  format: email
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Email verificado
+  /users:
+    get:
+      summary: Listar todos los usuarios
+      responses:
+        '200':
+          description: Lista de usuarios
+    post:
+      summary: Crear usuario (legacy)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password_hash, role]
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password_hash:
+                  type: string
+                role:
+                  type: string
+                  enum: [artist, manager, admin]
+      responses:
+        '201':
+          description: Usuario creado
+  /users/{userId}:
+    get:
+      summary: Obtener usuario por ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario encontrado
+    put:
+      summary: Actualizar usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Usuario actualizado
+    delete:
+      summary: Eliminar usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Usuario eliminado
+  /admin/users/status:
+    get:
+      summary: Listar usuarios por estado
+      parameters:
+        - in: query
+          name: state
+          required: true
+          schema:
+            type: string
+            enum: [active, inactive]
+      responses:
+        '200':
+          description: Lista de usuarios filtrados
+  /admin/user/approve/{userId}:
+    post:
+      summary: Aprobar usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario aprobado
+  /admin/user/reject/{userId}:
+    post:
+      summary: Rechazar usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario rechazado
+  /admin/user/changestate/{userId}:
+    post:
+      summary: Cambiar estado de usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Estado de usuario cambiado
+  /admin/settings:
+    get:
+      summary: Obtener configuración global
+      responses:
+        '200':
+          description: Configuración global
+    put:
+      summary: Actualizar configuración global
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                config:
+                  type: object
+      responses:
+        '200':
+          description: Configuración actualizada
+  /admin/users:
+    get:
+      summary: Listar todos los usuarios (admin)
+      responses:
+        '200':
+          description: Lista de usuarios
+  /admin/user/{userId}:
+    delete:
+      summary: Eliminar o desactivar usuario
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: hard
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: Usuario eliminado o desactivado
+  /admin/assets/pending:
+    get:
+      summary: Listar assets pendientes de moderación
+      responses:
+        '200':
+          description: Lista de assets pendientes
+  /admin/asset/{assetId}/approve:
+    post:
+      summary: Aprobar asset para publicación
+      parameters:
+        - in: path
+          name: assetId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Asset aprobado
+

@@ -1,0 +1,216 @@
+{
+  "info": {
+    "_postman_id": "studio-api-collection",
+    "name": "Studio API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección de pruebas para la API de Studio"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Registro de usuario",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"nuevo@correo.com\",\n  \"password\": \"clave123\",\n  \"role\": \"artist\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": [ "{{baseUrl}}" ], "path": [ "auth", "register" ] }
+          }
+        },
+        {
+          "name": "Login de usuario",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"password\": \"clave123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": [ "{{baseUrl}}" ], "path": [ "auth", "login" ] }
+          }
+        },
+        {
+          "name": "Logout de usuario",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": [ "{{baseUrl}}" ], "path": [ "auth", "logout" ] }
+          }
+        },
+        {
+          "name": "Resetear contraseña",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo@correo.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/resetpassword", "host": [ "{{baseUrl}}" ], "path": [ "auth", "resetpassword" ] }
+          }
+        },
+        {
+          "name": "Verificar email",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo@correo.com\",\n  \"token\": \"token_de_verificacion\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/verifyemail", "host": [ "{{baseUrl}}" ], "path": [ "auth", "verifyemail" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar todos los usuarios",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users", "host": [ "{{baseUrl}}" ], "path": [ "users" ] }
+          }
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/users/1", "host": [ "{{baseUrl}}" ], "path": [ "users", "1" ] }
+          }
+        },
+        {
+          "name": "Crear usuario (legacy)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nuevo_usuario\",\n  \"email\": \"nuevo@correo.com\",\n  \"password_hash\": \"clave123\",\n  \"role\": \"artist\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": [ "{{baseUrl}}" ], "path": [ "users" ] }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"usuario_actualizado\",\n  \"email\": \"actualizado@correo.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/1", "host": [ "{{baseUrl}}" ], "path": [ "users", "1" ] }
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/users/1", "host": [ "{{baseUrl}}" ], "path": [ "users", "1" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Listar usuarios por estado",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/users/status?state=active", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users", "status" ], "query": [ { "key": "state", "value": "active" } ] }
+          }
+        },
+        {
+          "name": "Aprobar usuario",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/admin/user/approve/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "user", "approve", "1" ] }
+          }
+        },
+        {
+          "name": "Rechazar usuario",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/admin/user/reject/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "user", "reject", "1" ] }
+          }
+        },
+        {
+          "name": "Cambiar estado de usuario",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/admin/user/changestate/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "user", "changestate", "1" ] }
+          }
+        },
+        {
+          "name": "Obtener configuración global",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/settings", "host": [ "{{baseUrl}}" ], "path": [ "admin", "settings" ] }
+          }
+        },
+        {
+          "name": "Actualizar configuración global",
+          "request": {
+            "method": "PUT",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"config\": { \"key\": \"value\" }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admin/settings", "host": [ "{{baseUrl}}" ], "path": [ "admin", "settings" ] }
+          }
+        },
+        {
+          "name": "Listar todos los usuarios (admin)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/users", "host": [ "{{baseUrl}}" ], "path": [ "admin", "users" ] }
+          }
+        },
+        {
+          "name": "Eliminar o desactivar usuario (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/admin/user/1", "host": [ "{{baseUrl}}" ], "path": [ "admin", "user", "1" ] }
+          }
+        },
+        {
+          "name": "Eliminar usuario (hard delete)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/admin/user/1?hard=true", "host": [ "{{baseUrl}}" ], "path": [ "admin", "user", "1" ], "query": [ { "key": "hard", "value": "true" } ] }
+          }
+        },
+        {
+          "name": "Listar assets pendientes de moderación",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/admin/assets/pending", "host": [ "{{baseUrl}}" ], "path": [ "admin", "assets", "pending" ] }
+          }
+        },
+        {
+          "name": "Aprobar asset para publicación",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/admin/asset/1/approve", "host": [ "{{baseUrl}}" ], "path": [ "admin", "asset", "1", "approve" ] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "https://api-studio-ckhrecg0byfeh2fs.centralus-01.azurewebsites.net/api/v1" }
+  ]
+}
+
