@@ -1,6 +1,6 @@
-# Backend Anima Studio
+# Backend API
 
-Backend API para la plataforma Anima Studio, construido con Node.js, Express, TypeScript y TypeORM.
+API backend para la plataforma, construida con Node.js, Express, TypeScript y TypeORM.
 
 ## Requisitos Previos
 
@@ -13,7 +13,7 @@ Backend API para la plataforma Anima Studio, construido con Node.js, Express, Ty
 1. **Clonar el repositorio**
    ```bash
    git clone [URL_DEL_REPOSITORIO]
-   cd backend-anima-studio
+   cd backend
    ```
 
 2. **Instalar dependencias**
@@ -32,14 +32,13 @@ Backend API para la plataforma Anima Studio, construido con Node.js, Express, Ty
 
 4. **Configurar la base de datos**
    - Asegúrate de que MySQL esté en ejecución
-   - Crea una base de datos con el nombre especificado en `DB_NAME` (por defecto: `ai_platform`)
+   - Crea una base de datos con el nombre especificado en `DB_NAME`
 
 ## Ejecutar la aplicación
 
 ### Desarrollo
 
 ```bash
-# Iniciar en modo desarrollo (con hot-reload)
 npm run dev
 # o
 yarn dev
@@ -48,12 +47,10 @@ yarn dev
 ### Producción
 
 ```bash
-# Compilar TypeScript a JavaScript
 npm run build
 # o
 yarn build
 
-# Iniciar la aplicación
 npm start
 # o
 yarn start
@@ -61,7 +58,7 @@ yarn start
 
 ## Estructura del Proyecto
 
-```
+```bash
 src/
 ├── config/         # Configuraciones (base de datos, variables de entorno)
 ├── controllers/    # Controladores de la API
